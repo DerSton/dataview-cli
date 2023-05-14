@@ -26,6 +26,41 @@ class Terminal:
         self.__colormode = colormode
 
 
+class JsonTree:
+    def __init__(self, json_data: dict, title: str = "Unnamed json tree"):
+        self.__title = title
+        self.json_data = json_data
+
+    def __iterate_json(self, json_dict: dict, colors: list, result="", iteration=0, spacing="    "):
+        color = colors[iteration % (len(colors))]
+
+        for k, v in json_dict.items():
+            if isinstance(v, dict):
+                result += f"{color}{spacing * iteration}┗ ['{k}']{stylesheets.General.RESET}\n"
+                result = self.__iterate_json(v, colors, result, iteration=iteration + 1)
+                continue
+            elif isinstance(v, list):
+                result += f"{color}{spacing * iteration}┗ ['{k}']{stylesheets.General.RESET}\n"
+                for ii, li in enumerate(v):
+                    if isinstance(li, dict):
+                        result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{ii}]{stylesheets.General.RESET}\n"
+                        result = self.__iterate_json(li, colors, result, iteration=iteration + 2)
+                        continue
+                    else:
+                        result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{ii}]{stylesheets.General.RESET}{li}\n"
+                continue
+            else:
+                result += f"{color}{spacing * iteration}┗ ['{k}']{stylesheets.General.RESET}{v}\n"
+        return result
+
+    def __str__(self):
+        return self.__iterate_json(self.json_data, result=f"{stylesheets.General.UNDERLINE}{stylesheets.General.BOLD}{self.__title}{stylesheets.General.RESET}\n\n",
+                                   colors=[stylesheets.General.Foreground.BLUE,
+                                           stylesheets.General.Foreground.GREEN,
+                                           stylesheets.General.Foreground.CYAN,
+                                           stylesheets.General.Foreground.MAGENTA])
+
+
 class PointMatrix:
     def __init__(self, x_name: str, y_name: str, x_axis: tuple = (0, 20), x_step: int = 2, y_axis: tuple = (0, 10),
                  y_step: int = 2):
@@ -82,47 +117,3 @@ class PointMatrix:
         __result = f"{__result}\n\n\n{__legend}"
 
         return __result
-# print(f"""
-#     {TerminalColor.BOLD}{TerminalColor.UNDERLINE}Unbenanntes Diagramm{TerminalColor.END}
-# zeit in s
-#   ┃
-# 3 ┫    {TerminalColor.RED}✦{TerminalColor.END}   {TerminalColor.BLUE}✦{TerminalColor.END}
-#   ┃
-# 2 ┫         {TerminalColor.RED}✦{TerminalColor.END}
-#   ┃         {TerminalColor.BLUE}✦{TerminalColor.END}
-# 1 ┫   {TerminalColor.BLUE}✦{TerminalColor.END}              {TerminalColor.RED}✦{TerminalColor.END}
-#   ┗━┳━━┳━━┳━━┳━━┳━━┳━━┳━━┳  strecke in m
-#     1  2  3  4  5  6  7  8
-#
-# ┏━━━━━━━━┓
-# ┃{TerminalColor.BOLD}Legende{TerminalColor.END}┃
-# ┃{TerminalColor.RED}✦{TerminalColor.END} = Versuch 1┃
-# ┃{TerminalColor.BLUE}✦{TerminalColor.END} = Versuch 2┃
-# ┗━━━━━━━━┛""")
-#
-# print(f"""
-#     {TerminalColor.BOLD}{TerminalColor.UNDERLINE}Unbenanntes Diagramm{TerminalColor.END}
-# zeit in s
-#   ^
-# 3 ┫           {TerminalColor.GREEN}█{TerminalColor.END}
-#   ┃     {TerminalColor.BLUE}█{TerminalColor.END}     {TerminalColor.GREEN}█{TerminalColor.END}
-# 2 ┫  {TerminalColor.RED}█{TerminalColor.END}  {TerminalColor.BLUE}█{TerminalColor.END}     {TerminalColor.GREEN}█{TerminalColor.END}
-#   ┃  {TerminalColor.RED}█{TerminalColor.END}  {TerminalColor.BLUE}█{TerminalColor.END}     {TerminalColor.GREEN}█{TerminalColor.END}
-# 1 ┫  {TerminalColor.RED}█{TerminalColor.END}  {TerminalColor.BLUE}█{TerminalColor.END}  {TerminalColor.CYAN}█{TerminalColor.END}  {TerminalColor.GREEN}█{TerminalColor.END}
-#   ┗━━┳━━┳━━┳━━┳━━
-#      {TerminalColor.RED}A{TerminalColor.END}  {TerminalColor.BLUE}B{TerminalColor.END}  {TerminalColor.CYAN}C{TerminalColor.END}  {TerminalColor.GREEN}D{TerminalColor.END}
-#
-# """)
-#
-#
-# print(f"""
-#     {TerminalColor.BOLD}{TerminalColor.UNDERLINE}Unbenannter Tree{TerminalColor.END}
-#
-# {TerminalColor.BLUE}['data']{TerminalColor.END}
-#     {TerminalColor.GREEN}┗ [1]{TerminalColor.END}201
-#     {TerminalColor.GREEN}┗ [2]{TerminalColor.END}konnte nicht zugestellt werden
-#     {TerminalColor.GREEN}┗ [3]{TerminalColor.END}
-#        {TerminalColor.CYAN}┗ ['string']{TerminalColor.END}alles ist super
-#        {TerminalColor.CYAN}┗ ['header']{TerminalColor.END}nicht bekannt
-# """)
-#
