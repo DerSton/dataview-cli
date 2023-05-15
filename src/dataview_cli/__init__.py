@@ -31,20 +31,40 @@ class JsonTree:
         self.__title = title
         self.json_data = json_data
 
-    def __iterate_json(self, json_dict: dict, colors: list, result="", iteration=0, spacing="    "):
+    def __iterate_list(self, json_list: list, colors: list, index, result="", iteration=0, spacing="    "):
+        color = colors[iteration % (len(colors))]
+
+        result += f"{color}{spacing * iteration}┗  [{index}]{stylesheets.General.RESET}\n"
+        for i, li in enumerate(json_list):
+            if isinstance(li, dict):
+                result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{i}]{stylesheets.General.RESET}\n"
+                result = self.__iterate_dict(li, colors, result, iteration=iteration + 2)
+                continue
+            elif isinstance(li, list):
+                result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{i}]{stylesheets.General.RESET}\n"
+                result = self.__iterate_list(li, colors, result, iteration=iteration + 2)
+                continue
+            else:
+                result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{i}]{stylesheets.General.RESET}{li}\n"
+        return result
+
+    def __iterate_dict(self, json_dict: dict, colors: list, result="", iteration=0, spacing="    "):
         color = colors[iteration % (len(colors))]
 
         for k, v in json_dict.items():
             if isinstance(v, dict):
                 result += f"{color}{spacing * iteration}┗ ['{k}']{stylesheets.General.RESET}\n"
-                result = self.__iterate_json(v, colors, result, iteration=iteration + 1)
+                result = self.__iterate_dict(v, colors, result, iteration=iteration + 1)
                 continue
             elif isinstance(v, list):
                 result += f"{color}{spacing * iteration}┗ ['{k}']{stylesheets.General.RESET}\n"
                 for ii, li in enumerate(v):
                     if isinstance(li, dict):
                         result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{ii}]{stylesheets.General.RESET}\n"
-                        result = self.__iterate_json(li, colors, result, iteration=iteration + 2)
+                        result = self.__iterate_dict(li, colors, result, iteration=iteration + 2)
+                        continue
+                    if isinstance(li, list):
+                        result = self.__iterate_list(li, colors, ii, result, iteration=iteration + 1)
                         continue
                     else:
                         result += f"{colors[((iteration + 1) % len(colors))]}{spacing * (iteration + 1)}┗  [{ii}]{stylesheets.General.RESET}{li}\n"
@@ -54,7 +74,7 @@ class JsonTree:
         return result
 
     def __str__(self):
-        return self.__iterate_json(self.json_data, result=f"{stylesheets.General.UNDERLINE}{stylesheets.General.BOLD}{self.__title}{stylesheets.General.RESET}\n\n",
+        return self.__iterate_dict(self.json_data, result=f"{stylesheets.General.UNDERLINE}{stylesheets.General.BOLD}{self.__title}{stylesheets.General.RESET}\n\n",
                                    colors=[stylesheets.General.Foreground.BLUE,
                                            stylesheets.General.Foreground.GREEN,
                                            stylesheets.General.Foreground.CYAN,
